@@ -17,35 +17,67 @@ $("#clear-canvas").click(function(){
 });
 
 
-// Predict button callback
+// // Predict button callback
+// $("#predict").click(function(){
+//
+//   // Change status indicator
+//   $("#status").removeClass().toggleClass("fa fa-spinner fa-spin");
+//
+//   // Get canvas contents as url
+//   var fac = (1.) / 13.;
+//   var url = canvas.toDataURLWithMultiplier('png', fac);
+//
+//   // Post url to python script
+//   var jq = $.post('cgi-bin/mnist.py', url)
+//     .done(function (json) {
+//       if (json.result) {
+//         $("#status").removeClass().toggleClass("fa fa-check");
+//         $('#svg-chart').show();
+//         updateChart(json.data);
+//       } else {
+//          $("#status").removeClass().toggleClass("fa fa-exclamation-triangle");
+//          console.log('Script Error: ' + json.error)
+//       }
+//     })
+//     .fail(function (xhr, textStatus, error) {
+//       $("#status").removeClass().toggleClass("fa fa-exclamation-triangle");
+//       console.log("POST Error: " + xhr.responseText + ", " + textStatus + ", " + error);
+//     }
+//   );
+//
+// });
+
 $("#predict").click(function(){
 
   // Change status indicator
   $("#status").removeClass().toggleClass("fa fa-spinner fa-spin");
 
   // Get canvas contents as url
-  var fac = (1.) / 13.;
-  var url = canvas.toDataURLWithMultiplier('png', fac);
 
-  // Post url to python script
-  var jq = $.post('cgi-bin/mnist.py', url)
-    .done(function (json) {
-      if (json.result) {
-        $("#status").removeClass().toggleClass("fa fa-check");
-        $('#svg-chart').show();
-        updateChart(json.data);
-      } else {
-         $("#status").removeClass().toggleClass("fa fa-exclamation-triangle");
-         console.log('Script Error: ' + json.error)
-      }
-    })
-    .fail(function (xhr, textStatus, error) {
-      $("#status").removeClass().toggleClass("fa fa-exclamation-triangle");
-      console.log("POST Error: " + xhr.responseText + ", " + textStatus + ", " + error);
-    }
-  );
+    var fac = (1.) / 13.;
+    const data = canvas.toDataURLWithMultiplier('png', fac);
 
-});
+    fetch('/send-img', {
+      method: 'POST',
+      body: JSON.stringify(data),
+
+
+    }).then(function (json) {
+            console.log(json);
+
+            if (json.result) {
+            $("#status").removeClass().toggleClass("fa fa-check");
+            $('#svg-chart').show();
+            updateChart(json.data);
+            } else {
+             $("#status").removeClass().toggleClass("fa fa-exclamation-triangle");
+             console.log('Script Error: ' + json.error)
+            }
+        })
+        .catch(function (err) {
+            console.log(err);
+    });
+  });
 
 // Iniitialize d3 bar chart
 $('#svg-chart').hide();
